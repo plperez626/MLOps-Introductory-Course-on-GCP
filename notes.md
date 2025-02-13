@@ -18,6 +18,12 @@ https://medium.com/google-cloud/create-a-ci-cd-pipeline-using-github-actions-and
 
 https://github.com/iusztinpaul/energy-forecasting/blob/main/README_DEPLOY.md
 
+https://github.com/simonloew/mlops_on_gcp?tab=readme-ov-file
+
+https://github.com/Harshit-crypto/gcp-github-trigger
+
+https://github.com/sidoncloud/gcp-mlops/tree/main
+
 https://github.com/GoogleCloudPlatform/mlops-on-gcp/tree/master
 
 
