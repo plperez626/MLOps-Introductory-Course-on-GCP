@@ -47,12 +47,9 @@ Make a summary of https://cloud.google.com/architecture/mlops-continuous-deliver
 
 Focus on GCP :
 
-TFX = ML E2E platform 
-
-Applications: for broad use cases
-
-Compatible infrastructures : For GCP and on-premise
-
-Completely opensourced in 2019 : used at Alphabet of course but also Spotify, Twitter, Airbus
+- TFX = ML E2E platform 
+- Applications: for broad use cases
+-Compatible infrastructures : For GCP and on-premise
+- Completely opensourced in 2019 : used at Alphabet of course but also Spotify, Twitter, Airbus
 
 ![alt text](image.png)
