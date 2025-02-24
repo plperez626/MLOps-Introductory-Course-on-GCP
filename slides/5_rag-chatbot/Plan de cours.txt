@@ -10,19 +10,4 @@ Finir Notebook RAG
 3/ On donne un fichier PDF parce que c'est la base, donc faire script pour convertir le pdf en texte et upload dans bucket.
 4/ Refaire pipeline RAG mais avec evaluation => trouver les bons paramètres pour améliorer les résultats
 
-Puis :
-Choix 1 :
-
-5/ Trouver une question ou ça va pas marcher car il y a des images dans le fichier.
-=> Refaire convertir PDF en texte mais avec images (A FAIRE Headmind)
-=> Refaire la question
-
-Choix 2 :
-
-5/ Renvoyer un PDF (avec uniquement des images)
-=> Refaire convertir PDF en texte mais avec images (A FAIRE Headmind)
-=> Refaire l'évaluation
-
-Choix 3 :
-
 5/ Création de leur propre RAG spécialisé, les étudiants cherchent leurs propres pdf sur internet à convertir en texte. L'évalue en créant leurs propres ground-truth.
