@@ -12,7 +12,7 @@ app = FastAPI()
 PROJECT_ID = "projet-ia-448520"  
 LOCATION = "us-central1"  
 BUCKET_URI = f"gs://cours3bucket"
-ID_ENDPOINT = "5825974565515296768"
+ID_ENDPOINT = "3863531027888603136" #"5825974565515296768"
 
 
 class Payload(BaseModel):
@@ -30,7 +30,6 @@ async def call_bedrock(payload: Payload):
 
         predictions = endpoint.predict(instances=[img])
         y_predicted = np.argmax(predictions.predictions, axis=1)
-        print(y_predicted)
         return int(y_predicted[0])
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error calling Vertex: {e}") 

@@ -4,6 +4,9 @@ import json
 import numpy as np
 from PIL import Image
 import os 
+PROJECT_ID = "projet-ia-448520"  
+LOCATION = "us-central1"  
+ENDPOINT_ID = "5825974565515296768"
 
 def load_data():
     IMAGE_DIRECTORY = "cifar_test_images"
@@ -20,16 +23,30 @@ x_test, y_test = load_data()
 class APIUser(HttpUser):
     wait_time = between(1, 3)  
 
+    def on_start(self):
+        from google.auth import default
+        from google.auth.transport.requests import Request
+
+        credentials, _ = default()
+        credentials.refresh(Request())
+        self.auth_token = credentials.token
+        #return super().on_start()
+
     @task
     def call_endpoint(self):
         single_image = x_test[1]
         
         
-        payload = {"img": json.loads(json.dumps(single_image))}
+        payload = {'instances': [
+            json.loads(json.dumps(single_image))
+            ]
+            }
         
-      
-        response = self.client.post("/call-endpoint/", json=payload)
-        
+        header = {
+            "Authorization": f"Bearer {self.auth_token}",
+            "Content-Type": "application/json"
+        }
+        response = self.client.post(f"/v1/projects/{PROJECT_ID}/locations/{LOCATION}/endpoints/{ENDPOINT_ID}:predict", json=payload, headers = header)
        
         if response.status_code == 200:
             print(response.json())
