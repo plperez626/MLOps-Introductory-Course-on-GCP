@@ -59,6 +59,44 @@ def _get_serve_tf_examples_fn(model, tf_transform_output):
     return model(transformed_features)
 
   return serve_tf_examples_fn
+# def _get_serve_tf_examples_fn(model, tf_transform_output):
+#     """Returns a function that parses a serialized tf.Example and applies TFT."""
+
+#     # Add the TFT layer to the model
+#     model.tft_layer = tf_transform_output.transform_features_layer()
+
+#     @tf.function(input_signature=[tf.TensorSpec(shape=[None], dtype=tf.string, name='examples')])
+#     def serve_tf_examples_fn(serialized_tf_examples):
+#         """Returns the output to be used in the serving signature."""
+#         # Get the feature spec and remove the label key (if present)
+#         feature_spec = tf_transform_output.raw_feature_spec()
+#         if features.LABEL_KEY in feature_spec:
+#             feature_spec.pop(features.LABEL_KEY)
+
+#         # Parse the serialized examples
+#         parsed_features = tf.io.parse_example(serialized_tf_examples, feature_spec)
+
+#         # Convert sparse tensors to dense tensors
+#         dense_features = {}
+#         for key, value in parsed_features.items():
+#             if isinstance(value, tf.SparseTensor):
+#                 dense_features[key] = tf.sparse.to_dense(value)
+#             else:
+#                 dense_features[key] = value
+
+#         # Debugging: Print dense features to verify their structure
+#         print("Dense Features:", dense_features)
+
+#         # Apply the TFT preprocessing layer
+#         transformed_features = model.tft_layer(dense_features)
+
+#         # Debugging: Print transformed features to verify their structure
+#         print("Transformed Features:", transformed_features)
+
+#         # Call the model with the transformed features
+#         return model(transformed_features)
+
+#     return serve_tf_examples_fn
 
 
 def _input_fn(file_pattern: List[Text],
@@ -102,7 +140,7 @@ def _get_hyperparameters() -> kerastuner.HyperParameters:
   return hp
 
 
-def _build_keras_model(hparams: kerastuner.HyperParameters, 
+def build_keras_model(hparams: kerastuner.HyperParameters, 
                       tf_transform_output: tft.TFTransformOutput) -> tf.keras.Model:
   # Define inputs for numeric features
   numeric_inputs = {
@@ -255,12 +293,12 @@ def tuner_fn(fn_args: TrainerFnArgs) -> TunerFnResult:
   
   # Construct a build_keras_model_fn that just takes hyperparams from get_hyperparameters as input.
   build_keras_model_fn = functools.partial(
-      _build_keras_model, tf_transform_output=transform_graph)  
+      build_keras_model, tf_transform_output=transform_graph)  
 
   # BayesianOptimization is a subclass of kerastuner.Tuner which inherits from BaseTuner.    
   tuner = kerastuner.BayesianOptimization(
       build_keras_model_fn,
-      max_trials=10,
+      max_trials=5,
       hyperparameters=_get_hyperparameters(),
       # New entries allowed for n_units hyperparameter construction conditional on n_layers selected.
 #       allow_new_entries=True,
@@ -292,86 +330,32 @@ def tuner_fn(fn_args: TrainerFnArgs) -> TunerFnResult:
 
 
 # TFX Trainer will call this function.
-# def run_fn(fn_args: TrainerFnArgs):
-#   """Train the model based on given args.
-#   Args:
-#     fn_args: Holds args used to train the model as name/value pairs.
-#   """
-
-#   tf_transform_output = tft.TFTransformOutput(fn_args.transform_output)
-
-#   train_dataset = _input_fn(
-#       fn_args.train_files, 
-#       fn_args.data_accessor, 
-#       tf_transform_output, 
-#       TRAIN_BATCH_SIZE)
-
-#   eval_dataset = _input_fn(
-#       fn_args.eval_files, 
-#       fn_args.data_accessor,
-#       tf_transform_output, 
-#       EVAL_BATCH_SIZE)
-
-#   if fn_args.hyperparameters:
-#     hparams = kerastuner.HyperParameters.from_config(fn_args.hyperparameters)
-#   else:
-#     # This is a shown case when hyperparameters is decided and Tuner is removed
-#     # from the pipeline. User can also inline the hyperparameters directly in
-#     # _build_keras_model.
-#     hparams = _get_hyperparameters()
-#   absl.logging.info('HyperParameters for training: %s' % hparams.get_config())
-  
-#   # Distribute training over multiple replicas on the same machine.
-#   mirrored_strategy = tf.distribute.MirroredStrategy()
-#   with mirrored_strategy.scope():
-#         model = _build_keras_model(
-#             hparams=hparams,
-#             tf_transform_output=tf_transform_output)
-
-#   tensorboard_callback = tf.keras.callbacks.TensorBoard(
-#       log_dir=fn_args.model_run_dir, update_freq='batch')
-
-#   model.fit(
-#       train_dataset,
-#       epochs=EPOCHS,
-#       steps_per_epoch=fn_args.train_steps,
-#       validation_data=eval_dataset,
-#       validation_steps=fn_args.eval_steps,
-#       callbacks=[tensorboard_callback])
-    
-#   signatures = {
-#       'serving_default':
-#           _get_serve_tf_examples_fn(model,
-#                                     tf_transform_output).get_concrete_function(
-#                                         tf.TensorSpec(
-#                                             shape=[None],
-#                                             dtype=tf.string,
-#                                             name='examples')),
-#   }
-
-def _run_fn(fn_args: TrainerFnArgs):
+def run_fn(fn_args: TrainerFnArgs):
   """Train the model based on given args.
   Args:
     fn_args: Holds args used to train the model as name/value pairs.
   """
+
   tf_transform_output = tft.TFTransformOutput(fn_args.transform_output)
+
   train_dataset = _input_fn(
       fn_args.train_files, 
       fn_args.data_accessor, 
       tf_transform_output, 
       TRAIN_BATCH_SIZE)
+
   eval_dataset = _input_fn(
       fn_args.eval_files, 
       fn_args.data_accessor,
       tf_transform_output, 
       EVAL_BATCH_SIZE)
-  
+
   if fn_args.hyperparameters:
     hparams = kerastuner.HyperParameters.from_config(fn_args.hyperparameters)
   else:
     # This is a shown case when hyperparameters is decided and Tuner is removed
     # from the pipeline. User can also inline the hyperparameters directly in
-    # build_keras_model.
+    # _build_keras_model.
     hparams = _get_hyperparameters()
   absl.logging.info('HyperParameters for training: %s' % hparams.get_config())
   
@@ -381,10 +365,10 @@ def _run_fn(fn_args: TrainerFnArgs):
         model = build_keras_model(
             hparams=hparams,
             tf_transform_output=tf_transform_output)
-            
+
   tensorboard_callback = tf.keras.callbacks.TensorBoard(
       log_dir=fn_args.model_run_dir, update_freq='batch')
-      
+
   model.fit(
       train_dataset,
       epochs=EPOCHS,
@@ -393,36 +377,367 @@ def _run_fn(fn_args: TrainerFnArgs):
       validation_steps=fn_args.eval_steps,
       callbacks=[tensorboard_callback])
     
-  # For Keras 3 compatibility, we need a different approach to signatures
-  # First, save the model in Keras format
-  model_path = fn_args.serving_model_dir
-  model.save(model_path + '.keras')
+  signatures = {
+      'serving_default':
+          _get_serve_tf_examples_fn(model,
+                                    tf_transform_output).get_concrete_function(
+                                        tf.TensorSpec(
+                                            shape=[None],
+                                            dtype=tf.string,
+                                            name='examples')),
+  }
+  # model.save(fn_args.serving_model_dir, save_format='tf', signatures=signatures)
+  # absl.logging.info("Model saved successfully") 
+
+#   @tf.function(input_signature=[tf.TensorSpec(shape=[None], dtype=tf.string, name='examples')])
+#   def serve_tf_examples_fn(examples):
+#     # Preprocess the examples using tf_transform_output
+#         print("Feature Spec:", tf_transform_output.raw_feature_spec())
+#         processed_features = tf_transform_output.transform_raw_features(examples)
+
+#         # Call the model
+#         return model(processed_features)
+  #serve_tf_examples_fn = _get_serve_tf_examples_fn(model, tf_transform_output)
+
+    # Save the model with the serving signature
+  tf.saved_model.save(
+        model,
+        export_dir=fn_args.serving_model_dir,
+        signatures=signatures
+            #'serving_default': serve_tf_examples_fn,
+        
+        )
+  absl.logging.info("Model saved successfully")
+
+# def run_fn(fn_args: TrainerFnArgs):
+#   """Train the model based on given args.
+#   Args:
+#     fn_args: Holds args used to train the model as name/value pairs.
+#   """
+#   tf_transform_output = tft.TFTransformOutput(fn_args.transform_output)
+#   train_dataset = _input_fn(
+#       fn_args.train_files, 
+#       fn_args.data_accessor, 
+#       tf_transform_output, 
+#       TRAIN_BATCH_SIZE)
+#   eval_dataset = _input_fn(
+#       fn_args.eval_files, 
+#       fn_args.data_accessor,
+#       tf_transform_output, 
+#       EVAL_BATCH_SIZE)
   
-#   # Then, create and save a TensorFlow SavedModel with serving signature
-#   serving_fn = _get_serve_tf_examples_fn(model, tf_transform_output)
+#   if fn_args.hyperparameters:
+#     hparams = kerastuner.HyperParameters.from_config(fn_args.hyperparameters)
+#   else:
+#     # This is a shown case when hyperparameters is decided and Tuner is removed
+#     # from the pipeline. User can also inline the hyperparameters directly in
+#     # build_keras_model.
+#     hparams = _get_hyperparameters()
+#   absl.logging.info('HyperParameters for training: %s' % hparams.get_config())
   
-#   # Convert to a concrete function
-#   concrete_serving_fn = serving_fn.get_concrete_function(
-#       tf.TensorSpec(shape=[None], dtype=tf.string, name='examples'))
+#   # Distribute training over multiple replicas on the same machine.
+#   mirrored_strategy = tf.distribute.MirroredStrategy()
+#   with mirrored_strategy.scope():
+#         model = build_keras_model(
+#             hparams=hparams,
+#             tf_transform_output=tf_transform_output)
+            
+#   tensorboard_callback = tf.keras.callbacks.TensorBoard(
+#       log_dir=fn_args.model_run_dir, update_freq='batch')
+      
+#   model.fit(
+#       train_dataset,
+#       epochs=EPOCHS,
+#       steps_per_epoch=fn_args.train_steps,
+#       validation_data=eval_dataset,
+#       validation_steps=fn_args.eval_steps,
+#       callbacks=[tensorboard_callback])
+    
+#   # For Keras 3 compatibility, we need a different approach to signatures
+#   # First, save the model in Keras format
+#   model_path = fn_args.serving_model_dir
+#   # model.save(model_path + '.keras')
+#   serving_model_dir = fn_args.serving_model_dir
   
-#   # Create a new SavedModel with just the serving function
-#   model.save(fn_args.serving_model_dir+'.keras')
-#   tf.saved_model.save(
-#       obj=tf.Module(),
-#       export_dir=model_path,
-#       signatures={
-#           'serving_default': concrete_serving_fn
-#       }
- # )
+#   # Create an empty directory if it doesn't exist
+#   if not tf.io.gfile.exists(serving_model_dir):
+#     tf.io.gfile.makedirs(serving_model_dir)
   
-  # Optionally, you can log that the model has been saved
-  absl.logging.info(f"Model saved to {model_path}")  
+#   # Create a basic saved model in the correct directory
+#   tf.saved_model.save(model, serving_model_dir)
+  
+#   # Log success
+#   absl.logging.info(f"Model saved to {serving_model_dir}")
+  
+# #   # Then, create and save a TensorFlow SavedModel with serving signature
+# #   serving_fn = _get_serve_tf_examples_fn(model, tf_transform_output)
+  
+# #   # Convert to a concrete function
+# #   concrete_serving_fn = serving_fn.get_concrete_function(
+# #       tf.TensorSpec(shape=[None], dtype=tf.string, name='examples'))
+  
+# #   # Create a new SavedModel with just the serving function
+# #   model.save(fn_args.serving_model_dir+'.keras')
+# #   tf.saved_model.save(
+# #       obj=tf.Module(),
+# #       export_dir=model_path,
+# #       signatures={
+# #           'serving_default': concrete_serving_fn
+# #       }
+#  # )
+  
+#   # Optionally, you can log that the model has been saved
+#   absl.logging.info(f"Model saved to {model_path}")  
     
 
   #model.save(fn_args.serving_model_dir, save_format='tf', signatures=signatures)
   #model.save(fn_args.serving_model_dir+'.keras')
 
+# def run_fn(fn_args: TrainerFnArgs):
+#     """Train the model based on given args.
+#     Args:
+#       fn_args: Holds args used to train the model as name/value pairs.
+#     """
+#     tf_transform_output = tft.TFTransformOutput(fn_args.transform_output)
+#     train_dataset = input_fn(
+#         fn_args.train_files, 
+#         fn_args.data_accessor, 
+#         tf_transform_output, 
+#         TRAIN_BATCH_SIZE)
+#     eval_dataset = input_fn(
+#         fn_args.eval_files, 
+#         fn_args.data_accessor,
+#         tf_transform_output, 
+#         EVAL_BATCH_SIZE)
     
+#     if fn_args.hyperparameters:
+#         hparams = kerastuner.HyperParameters.from_config(fn_args.hyperparameters)
+#     else:
+#         hparams = get_hyperparameters()
+#     absl.logging.info('HyperParameters for training: %s' % hparams.get_config())
+    
+#     # Distribute training over multiple replicas on the same machine.
+#     mirrored_strategy = tf.distribute.MirroredStrategy()
+#     with mirrored_strategy.scope():
+#         model = build_keras_model(
+#             hparams=hparams,
+#             tf_transform_output=tf_transform_output)
+            
+#     tensorboard_callback = tf.keras.callbacks.TensorBoard(
+#         log_dir=fn_args.model_run_dir, update_freq='batch')
+      
+#     model.fit(
+#         train_dataset,
+#         epochs=EPOCHS,
+#         steps_per_epoch=fn_args.train_steps,
+#         validation_data=eval_dataset,
+#         validation_steps=fn_args.eval_steps,
+#         callbacks=[tensorboard_callback])
+    
+#     # Define a preprocessing function that handles all feature transformations
+#     def _preprocessing_fn(features):
+#         """Preprocesses features for model prediction."""
+#         transformed_features = {}
+        
+#         # Process numeric features
+#         for key in features.NUMERIC_FEATURE_KEYS:
+#             transformed_name = features.transformed_name(key)
+#             # Handle potential sparse tensor
+#             feature = features[key]
+#             if isinstance(feature, tf.sparse.SparseTensor):
+#                 feature = tf.sparse.to_dense(feature)
+#             transformed_features[transformed_name] = tf.cast(feature, tf.float32)
+#             if transformed_features[transformed_name].shape.rank == 1:
+#                 transformed_features[transformed_name] = tf.expand_dims(transformed_features[transformed_name], -1)
+        
+#         # Process categorical features 
+#         for key in features.CATEGORICAL_FEATURE_KEYS:
+#             transformed_name = features.transformed_name(key)
+#             # Handle potential sparse tensor
+#             feature = features[key]
+#             if isinstance(feature, tf.sparse.SparseTensor):
+#                 feature = tf.sparse.to_dense(feature)
+#             # Use vocabulary mapping for categorical features
+#             vocab_file = tf_transform_output.vocabulary_file_by_name(key)
+#             vocab_layer = VocabLookupLayer(vocab_file)
+#             transformed_features[transformed_name] = vocab_layer(feature)
+#             if transformed_features[transformed_name].shape.rank == 1:
+#                 transformed_features[transformed_name] = tf.expand_dims(transformed_features[transformed_name], -1)
+        
+#         return transformed_features
+    
+#     # Create a serving function that's compatible with TFMA
+#     @tf.function
+#     def _serving_fn(serialized_tf_examples):
+#         """Returns the output to be used in the serving signature."""
+#         # Get raw feature spec (excluding label)
+#         raw_feature_spec = tf_transform_output.raw_feature_spec().copy()
+#         if features.LABEL_KEY in raw_feature_spec:
+#             raw_feature_spec.pop(features.LABEL_KEY)
+        
+#         # Parse the input examples - handle both batch and single inputs
+#         parsed_features = tf.io.parse_example(serialized_tf_examples, raw_feature_spec)
+        
+#         # Apply preprocessing to the features
+#         transformed_features = _preprocessing_fn(parsed_features)
+        
+#         # Get predictions
+#         outputs = model(transformed_features)
+        
+#         # Format for TFMA - ensure this matches what the evaluator expects
+#         return {'outputs': outputs}
+    
+#     # Create concrete serving function that explicitly handles the input shape
+#     concrete_serving_fn = _serving_fn.get_concrete_function(
+#         tf.TensorSpec(shape=[None], dtype=tf.string, name='examples')
+#     )
+    
+#     # Save the model with appropriate signatures
+#     model_dir = fn_args.serving_model_dir
+#     signatures = {
+#         'serving_default': concrete_serving_fn
+#     }
+    
+#     # Save the model with tensorflow's SavedModel format
+#     tf.saved_model.save(
+#         model, 
+#         model_dir,
+#         signatures=signatures
+#     )
+    
+#     # Print confirmation
+    # absl.logging.info(f"Model saved to {model_dir} with serving_default signature")
+    # Then create a combined model that includes preprocessing and prediction
+#   preprocessing_model = _build_preprocessing_model(tf_transform_output)
+#   combined_model = _build_combined_model(
+#         preprocessing_model, model, tf_transform_output)
 
+#     # Save the combined model with proper signatures
+#   combined_model.save(fn_args.serving_model_dir, save_format='tf')
+
+#   absl.logging.info(f"Model saved to {fn_args.serving_model_dir}")
+    
   
+#   # Create a module for serving with proper signatures
+#   class TFXServingModel(tf.Module):
+#     def __init__(self, model, transform_output):
+#       self.model = model
+#       self.transform_output = transform_output
+#       self._preprocess_fn = transform_output.transform_features_layer()
+    
+#     @tf.function(input_signature=[tf.TensorSpec(shape=[None], dtype=tf.string, name='examples')])
+#     def serving_default(self, serialized_tf_examples):
+#         """Receives serialized tf.Examples and applies prediction."""
+#         # Get raw feature spec for parsing examples
+#         raw_feature_spec = self.transform_output.raw_feature_spec()
+#         # Remove label feature since it's not available during serving
+#         if features.LABEL_KEY in raw_feature_spec:
+#             raw_feature_spec.pop(features.LABEL_KEY)
+
+#         # Parse the examples
+#         parsed_features = tf.io.parse_example(serialized_tf_examples, raw_feature_spec)
+
+#         # Apply transformations
+#         transformed_features = self._preprocess_fn(parsed_features)
+
+#         # Important change here - match the input structure expected by your model
+#         # Instead of passing the dictionary directly, pass each input separately matching model's input layer names
+#         model_inputs = {}
+#         for key in transformed_features:
+#             if key in self.model.input_names:
+#                 model_inputs[key] = transformed_features[key]
+
+#         # Get predictions by passing the properly structured inputs
+#         outputs = self.model(model_inputs)
+
+#         return {'outputs': outputs}
+#   # Create the module with serving signature
+#   serving_model = TFXServingModel(model, tf_transform_output)
   
+#   # Save the model with the required signature
+#   serving_model_dir = fn_args.serving_model_dir
+#   tf.saved_model.save(
+#       serving_model,
+#       serving_model_dir,
+#       signatures={
+#           'serving_default': serving_model.serving_default
+#       }
+#   )
+  
+#   absl.logging.info(f"Model saved to {serving_model_dir} with serving_default signature")
+     
+   
+
+
+
+# def _build_preprocessing_model(tf_transform_output):
+#     """Creates a TF.Keras model that applies preprocessing transformations."""
+#     inputs = {}
+    
+#     # Create input layers for all raw features
+#     for key in features.NUMERIC_FEATURE_KEYS:
+#         inputs[key] = tf.keras.layers.Input(
+#             shape=(1,), dtype=tf.float32, name=key)
+    
+#     for key in features.CATEGORICAL_FEATURE_KEYS:
+#         inputs[key] = tf.keras.layers.Input(
+#             shape=(1,), dtype=tf.string, name=key)
+    
+#     # Get the transformation layer
+#     transform_layer = tf_transform_output.transform_features_layer()
+    
+#     # Apply the transformation layer to the inputs
+#     transformed_features = transform_layer(inputs)
+    
+#     # Create and return the preprocessing model
+#     preprocessing_model = tf.keras.Model(inputs=inputs, outputs=transformed_features)
+#     return preprocessing_model
+
+# def _build_combined_model(preprocessing_model, prediction_model, tf_transform_output):
+#     """Builds a combined model with preprocessing and prediction."""
+#     # Get the input layers from the preprocessing model
+#     inputs = preprocessing_model.inputs
+    
+#     # Get the transformed features from the preprocessing model
+#     transformed_features = preprocessing_model(inputs)
+    
+#     # Filter transformed features to only those expected by the prediction model
+#     model_inputs = {}
+#     for name in prediction_model.input_names:
+#         if name in transformed_features:
+#             model_inputs[name] = transformed_features[name]
+    
+#     # Apply the prediction model to the transformed features
+#     outputs = prediction_model(model_inputs)
+    
+#     # Create and return the combined model
+#     combined_model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    
+#     # Compile the model with the same configuration as the prediction model
+#     combined_model.compile(
+#         loss=prediction_model.loss,
+#         optimizer=prediction_model.optimizer,
+#         metrics=prediction_model.metrics
+#     )
+    
+#     return combined_model
+class VocabLookupLayer(tf.keras.layers.Layer):
+    def __init__(self, vocab_file, default_value=-1, **kwargs):
+        super(VocabLookupLayer, self).__init__(**kwargs)
+        self.vocab_file = vocab_file
+        self.default_value = default_value
+        self.vocab_table = None
+
+    def build(self, input_shape):
+        self.vocab_table = tf.lookup.StaticHashTable(
+            initializer=tf.lookup.TextFileInitializer(
+                filename=self.vocab_file,
+                key_dtype=tf.string,
+                key_index=tf.lookup.TextFileIndex.WHOLE_LINE,
+                value_dtype=tf.int64,
+                value_index=tf.lookup.TextFileIndex.LINE_NUMBER),
+            default_value=self.default_value)
+        super(VocabLookupLayer, self).build(input_shape)
+
+    def call(self, inputs):
+        return self.vocab_table.lookup(inputs)
