@@ -1,0 +1,10 @@
+google
+google-cloud-aiplatform
+google-cloud-storage
+pillow==10.2.0
+numpy==1.22.0
+backports.tarfile
+fastapi==0.75.0
+locust==2.9.0
+boto3==1.24.0
+
