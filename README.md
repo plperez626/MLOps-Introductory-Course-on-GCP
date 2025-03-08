@@ -1,44 +1,55 @@
-# MLOps Course on Google Cloud Platform
+# MLOps introductory course on Google Cloud Platform (GCP)
 
 This course is being taught at as part of [Master Year 2 Data Science Supaero](https://supaerodatascience.github.io/index.html)
 
-## Motivation
+
+<img src=https://www.isae-supaero.fr/local/cache-vignettes/L190xH102/siteon0-e5814.png width="150">
+
+This course is designed to be held during 5 classes lasting 3 hours each. This course will span over 15 hours.
+
+## A bit of context
 
 MLOps is a rapidly evolving field that combines machine learning and software engineering to streamline the deployment, monitoring, and maintenance of machine learning models in production. As machine learning systems become increasingly complex, the need for robust workflows and efficient collaboration between data scientists and engineers grows. This class will focus on the tools and practices that enable teams to develop and deploy machine learning models at scale. The goal is to equip students with the skills necessary to manage the full lifecycle of machine learning models, from experimentation to deployment and monitoring, using industry-standard tools and platforms.
 
-## Syllabus
+## Course syllabus
 
 The course covers the basics of MLOps, applied on Google Cloud Platform (GCP).
 
 ### Lecture slides
 
-- Tracking experiments, evaluating models, iterating on model versiongs using Mlflow
-- Setting up and using FlowML on Google Cloud Platform (GCP)
-- Deploying and serving models with scalable inference methods (batch and streaming)
-- Implementing an ML pipeline with CI/CD/CT
-- Final project: Deploying a RAG (Retrieval-Augmented Generation) Chatbot on Vertex AI
+1. Mlflow
+2. FlowML on Vertex AI (GCP)
+3. Deploy a model behing an endpoint on GCP. Batch and streaming inference
+4. ML pipelines on GCP 
+5. Deploy a RAG (Retrieval-Augmented Generation) chatbot on Vertex AI
 
-Note: press "P" to display the presenter's notes that include some comments and
-additional references.
-
-### Lab and Home Assignment Notebooks
+### Lab notebooks
 
 The Jupyter notebooks for the labs can be found in the `labs` folder of
-the [github repository](https://github.com/m2dsupsdlclass/lectures-labs/):
+this Git repository.
 
 ### Evaluation
 
-Hands-on implementation, code review, final project deployment, and a presentation of results
+Hands-on implementation on notebooks that will be assessed by the teacher.
   
 ## Acknowledgments
 
-This lecture is built and maintained by Headmind Partners AI
+This lecture was built by Headmind Partners AI
 
-We thank the teachers of Supaero
+- Nicolas Cabourdin
+- Adrien Dugast
+- Clément Eiserlorh
+- Ilan Gabay
+- Arthur Hochedez
+- Pierre-Louis Perez
+- Thomas Taylor
+- Vathana Thy 
+- Valentin Yiu
+
+The lecture is being taught by Pierre-Louis Perez
+
+We thank the teachers of Supaero for their confidence, especially Emmanuel Rachelson and Dennis Wilson.
 
 ## License
 
-All the code in this repository is made available under the ...
-
-<!-- The slides are published under the terms of the [CC-By 4.0
-license](https://creativecommons.org/licenses/by/4.0/). -->
+All the code in this repository belongs to <img src=https://www.headmind.com/wp-content/uploads/2024/01/logo_dark.png width="150">
