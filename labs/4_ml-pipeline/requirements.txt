@@ -1,0 +1,4 @@
+tensorflow==2.16.2
+tfx==1.16.0
+tensorflow-data-validation==1.16.1
+tensorflow-model-analysis==0.47.1
