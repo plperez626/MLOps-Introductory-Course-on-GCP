@@ -1,0 +1,13 @@
+
+Plan de cours :
+
+1/ Cours RAG (30min)
+
+2/ Mettre en place le RAG sur GCP => dès la deuxième cellule : création du bucket (notebook avec trous (bucket, project ID...))
+=> question cellule 6 : retourne rien car bucket vide => on envoie un fichier texte à mettre dans le bucket puis l'étudiant continue
+Finir Notebook RAG
+
+3/ On donne un fichier PDF parce que c'est la base, donc faire script pour convertir le pdf en texte et upload dans bucket.
+4/ Refaire pipeline RAG mais avec evaluation => trouver les bons paramètres pour améliorer les résultats
+
+5/ Création de leur propre RAG spécialisé, les étudiants cherchent leurs propres pdf sur internet à convertir en texte. L'évalue en créant leurs propres ground-truth.
