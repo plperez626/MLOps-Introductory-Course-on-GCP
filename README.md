@@ -40,6 +40,4 @@ We thank the teachers of Supaero for their confidence, especially Emmanuel Rache
 
 ## License
 
-All the code in this repository belongs to 
-
-<img src=https://cdn-images.welcometothejungle.com/tNgQfEtwNGye9LnsQbGbDZCjBl23aGz3DCUTcp3yV0I/rs:auto:400::/q:85/czM6Ly93dHRqLXByb2R1Y3Rpb24vdXBsb2Fkcy9vcmdhbml6YXRpb24vbG9nby82NzE4LzE2NjA2My82YmE5NjA4Ni02YjEzLTQ0Y2MtYjljMS05YzgxZmY0ZjJiYzYucG5n width="150">
+All the code in this repository belongs to Headmind Partners AI & Blockchain
