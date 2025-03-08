@@ -34,19 +34,7 @@ Hands-on implementation on notebooks that will be assessed by the teacher.
   
 ## Acknowledgments
 
-This lecture was built by Headmind Partners AI
-
-- Nicolas Cabourdin
-- Adrien Dugast
-- Clément Eiserlorh
-- Ilan Gabay
-- Arthur Hochedez
-- Pierre-Louis Perez
-- Thomas Taylor
-- Vathana Thy 
-- Valentin Yiu
-
-The lecture is being taught by Pierre-Louis Perez
+This lecture was built by Headmind Partners AI and being taught by Pierre-Louis Perez.
 
 We thank the teachers of Supaero for their confidence, especially Emmanuel Rachelson and Dennis Wilson.
 
