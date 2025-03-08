@@ -40,4 +40,4 @@ We thank the teachers of Supaero for their confidence, especially Emmanuel Rache
 
 ## License
 
-All the code in this repository belongs to <img src=https://www.headmind.com/wp-content/uploads/2024/01/logo_dark.png width="150">
+All the code in this repository belongs to <img src=https://join.headmind.com/wp-content/uploads/2021/12/Logo-HeadMind-Partners-PNG-BLEU.png width="170">
