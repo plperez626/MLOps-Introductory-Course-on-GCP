@@ -1,4 +1,4 @@
-# MLOPS ON GCP Course : lecture slides and lab notebooks
+# MLOps Course on Google Cloud Platform
 
 This course is being taught at as part of [Master Year 2 Data Science Supaero](https://supaerodatascience.github.io/index.html)
 
