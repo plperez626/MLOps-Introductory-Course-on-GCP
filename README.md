@@ -17,16 +17,23 @@ The course covers the basics of MLOps, applied on Google Cloud Platform (GCP).
 
 ### Lecture slides
 
-1. Mlflow
-2. FlowML on Vertex AI (GCP)
-3. Deploy a model behing an endpoint on GCP. Batch and streaming inference
-4. ML pipelines on GCP 
-5. Deploy a RAG (Retrieval-Augmented Generation) chatbot on Vertex AI
+- What is MLOps ?
+- Mlflow framework
+- FlowML on Vertex AI (GCP)
+- Deploy a model behing an endpoint on GCP. Batch and streaming inference
+- ML pipelines on GCP 
+- Deploy a RAG (Retrieval-Augmented Generation) chatbot on Vertex AI
 
-### Lab notebooks
+### Classes
 
 The Jupyter notebooks for the labs can be found in the `labs` folder of
 this Git repository.
+
+**Class #1**
+
+- [What is MLOps ?](slides\1_mlflow\what_is_mlops.pptx)
+- [Start MLOps with Mlflow framework](slides\1_mlflow\mlflow.pptx)
+- [Mlflow lab on local computers](labs\1_mlflow\XAI_mlflow.ipynb)
 
 #### Requirements
 
