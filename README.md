@@ -31,9 +31,9 @@ this Git repository.
 
 **Class #1**
 
-- [What is MLOps ?](slides\1_mlflow\what_is_mlops.pptx)
-- [Start MLOps with Mlflow framework](slides\1_mlflow\mlflow.pptx)
-- [Mlflow lab on local computers](labs\1_mlflow\XAI_mlflow.ipynb)
+- What is MLOps ?
+- Start MLOps with Mlflow framework
+- Mlflow lab on local computers
 
 #### Requirements
 
