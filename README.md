@@ -28,6 +28,10 @@ The course covers the basics of MLOps, applied on Google Cloud Platform (GCP).
 The Jupyter notebooks for the labs can be found in the `labs` folder of
 this Git repository.
 
+#### Requirements
+
+The labs are configured to run with python 3.11.0
+
 ### Evaluation
 
 Hands-on implementation on notebooks that will be assessed by the teacher.

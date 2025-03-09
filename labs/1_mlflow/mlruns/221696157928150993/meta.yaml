@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/221696157928150993
+creation_time: 1741555209847
+experiment_id: '221696157928150993'
+last_update_time: 1741555209847
+lifecycle_stage: active
+name: finetune-creditrisk
