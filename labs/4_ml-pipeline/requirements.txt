@@ -1,8 +1,0 @@
-absl-py
-tensorflow
-tensorflow-data-validation
-tensorflow-model-analysis
-tensorflow-transform
-tfx
-tensorflow-metadata
-protobuf
